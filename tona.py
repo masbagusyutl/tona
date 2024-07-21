@@ -1,6 +1,7 @@
 import time
 import requests
 from datetime import datetime, timedelta
+import re
 
 def read_data():
     with open('data.txt', 'r') as file:
@@ -37,6 +38,10 @@ def read_data():
 
     return accounts
 
+def extract_username(init_data):
+    match = re.search(r'username%22%3A%22([^%]+)%22', init_data)
+    return match.group(1) if match else "Unknown"
+
 def countdown(seconds):
     end_time = datetime.now() + timedelta(seconds=seconds)
     while datetime.now() < end_time:
@@ -45,14 +50,15 @@ def countdown(seconds):
         time.sleep(1)
     print()
 
-def main():
+def process_accounts():
     accounts = read_data()
     total_accounts = len(accounts)
     print(f"Total accounts: {total_accounts}")
 
     for index, account in enumerate(accounts):
-        print(f"\nProcessing account {index + 1}/{total_accounts}")
-        
+        username = extract_username(account['initData'])
+        print(f"\nProcessing account {index + 1}/{total_accounts} - Username: {username}")
+
         headers = {
             "Accept": "*/*",
             "Accept-Encoding": "gzip, deflate, br, zstd",
@@ -87,14 +93,17 @@ def main():
         response = requests.post('https://tonalytics.top/api2.php', headers=headers, data=payload)
 
         if response.status_code == 200:
-            print(f"Success for account {index + 1}")
+            print(f"Success for account {index + 1} - Username: {username}")
         else:
-            print(f"Failed for account {index + 1}, status code: {response.status_code}")
+            print(f"Failed for account {index + 1} - Username: {username}, status code: {response.status_code}")
 
         time.sleep(5)  # Delay of 5 seconds between account switches
 
-    print("All accounts processed. Starting 7-hour countdown.")
-    countdown(7 * 60 * 60)  # 7-hour countdown
+def main():
+    while True:
+        process_accounts()
+        print("All accounts processed. Starting 7-hour countdown.")
+        countdown(7 * 60 * 60)  # 7-hour countdown
 
 if __name__ == "__main__":
     main()
