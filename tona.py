@@ -8,19 +8,18 @@ def read_data():
         lines = file.read().splitlines()
 
     accounts = []
-    account = {}
+    account = {'initDataUnsafe': {}}
     for line in lines:
         if line.startswith('account[address]:'):
-            if account:
+            if account.get('account[address]'):
                 accounts.append(account)
-            account = {'initDataUnsafe': {}}
-        if 'account[address]:' in line:
+                account = {'initDataUnsafe': {}}
             account['account[address]'] = lines[lines.index(line) + 1]
-        if 'account[walletStateInit]:' in line:
+        elif line.startswith('account[walletStateInit]:'):
             account['account[walletStateInit]'] = lines[lines.index(line) + 1]
-        if 'account[publicKey]:' in line:
+        elif line.startswith('account[publicKey]:'):
             account['account[publicKey]'] = lines[lines.index(line) + 1]
-        if 'initData:' in line:
+        elif line.startswith('initData:'):
             init_data = lines[lines.index(line) + 1]
             account['initData'] = init_data
             params = init_data.split('&')
@@ -32,8 +31,7 @@ def read_data():
                 else:
                     sub_key = key_parts[1][:-1]
                     account['initDataUnsafe'][sub_key] = value
-
-    if account:
+    if account.get('account[address]'):
         accounts.append(account)
 
     return accounts
