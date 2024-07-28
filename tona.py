@@ -11,24 +11,36 @@ def read_data():
     account = {}
     for line in lines:
         if line.startswith('account[address]:'):
-            if 'account[address]' in account:
+            if account:
                 accounts.append(account)
-                account = {}
-            account['address'] = line.split(': ')[1]
-        elif line.startswith('account[walletStateInit]:'):
-            account['walletStateInit'] = line.split(': ')[1]
-        elif line.startswith('account[publicKey]:'):
-            account['publicKey'] = line.split(': ')[1]
-        elif line.startswith('initData:'):
-            init_data = line.split(': ')[1]
+            account = {'initDataUnsafe': {}}
+        if 'account[address]:' in line:
+            account['address'] = lines[lines.index(line) + 1]
+        if 'account[walletStateInit]:' in line:
+            account['walletStateInit'] = lines[lines.index(line) + 1]
+        if 'account[publicKey]:' in line:
+            account['publicKey'] = lines[lines.index(line) + 1]
+        if 'initData:' in line:
+            init_data = lines[lines.index(line) + 1]
             account['initData'] = init_data
-            username_match = re.search(r'username%22%3A%22(.*?)%22', init_data)
-            if username_match:
-                account['username'] = username_match.group(1)
-    if 'address' in account:
+            params = init_data.split('&')
+            for param in params:
+                key, value = param.split('=')
+                key_parts = key.split('[')
+                if len(key_parts) == 1:
+                    account[key] = value
+                else:
+                    sub_key = key_parts[1][:-1]
+                    account['initDataUnsafe'][sub_key] = value
+
+    if account:
         accounts.append(account)
 
     return accounts
+
+def extract_username(init_data):
+    match = re.search(r'username%22%3A%22([^%]+)%22', init_data)
+    return match.group(1) if match else "Unknown"
 
 def countdown(seconds):
     end_time = datetime.now() + timedelta(seconds=seconds)
@@ -44,7 +56,7 @@ def process_accounts():
     print(f"Total accounts: {total_accounts}")
 
     for index, account in enumerate(accounts):
-        username = account.get('username', 'Unknown')
+        username = extract_username(account['initData'])
         print(f"\nProcessing account {index + 1}/{total_accounts} - Username: {username}")
 
         headers = {
