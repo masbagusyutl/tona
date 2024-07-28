@@ -11,7 +11,7 @@ def read_data():
     account = {'initDataUnsafe': {}}
     for line in lines:
         if line.startswith('account[address]:'):
-            if account.get('account[address]'):
+            if 'account[address]' in account:
                 accounts.append(account)
                 account = {'initDataUnsafe': {}}
             account['account[address]'] = lines[lines.index(line) + 1]
@@ -31,7 +31,7 @@ def read_data():
                 else:
                     sub_key = key_parts[1][:-1]
                     account['initDataUnsafe'][sub_key] = value
-    if account.get('account[address]'):
+    if 'account[address]' in account:
         accounts.append(account)
 
     return accounts
