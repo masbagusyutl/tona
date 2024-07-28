@@ -50,8 +50,8 @@ def process_accounts():
     print(f"Total accounts: {total_accounts}")
 
     for index, account in enumerate(accounts):
-        account_address = account['account[address]']
-        print(f"\nProcessing account {index + 1}/{total_accounts} - Address: {account_address}")
+        username = account['initDataUnsafe'].get('username', 'Unknown')
+        print(f"\nProcessing account {index + 1}/{total_accounts} - Username: {username}")
 
         headers = {
             "Accept": "*/*",
@@ -87,9 +87,9 @@ def process_accounts():
         response = requests.post('https://tonalytics.top/api2.php', headers=headers, data=payload)
 
         if response.status_code == 200:
-            print(f"Success for account {index + 1} - Address: {account_address}")
+            print(f"Success for account {index + 1} - Username: {username}")
         else:
-            print(f"Failed for account {index + 1} - Address: {account_address}, status code: {response.status_code}")
+            print(f"Failed for account {index + 1} - Username: {username}, status code: {response.status_code}")
 
         time.sleep(5)  # Delay of 5 seconds between account switches
 
