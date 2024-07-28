@@ -8,6 +8,14 @@ import urllib.parse
 if not os.path.exists("accounts"):
     os.makedirs("accounts")
 
+def extract_username(init_data):
+    # Extract username from initData
+    init_data = urllib.parse.unquote(init_data)
+    username_start = init_data.find('username%22%3A%22') + len('username%22%3A%22')
+    username_end = init_data.find('%22%2C%22', username_start)
+    username = init_data[username_start:username_end]
+    return username
+
 def add_account():
     account_data = {}
     account_data['address'] = input("Enter account address: ")
@@ -15,11 +23,8 @@ def add_account():
     account_data['publicKey'] = input("Enter publicKey: ")
     account_data['initData'] = input("Enter initData: ")
     
-    # Extract username from initData
-    init_data = urllib.parse.unquote(account_data['initData'])
-    username_start = init_data.find('username%22%3A%22') + len('username%22%3A%22')
-    username_end = init_data.find('%22%2C%22', username_start)
-    username = init_data[username_start:username_end]
+    # Extract username
+    username = extract_username(account_data['initData'])
 
     # Save account data to file
     with open(f"accounts/{username}.txt", "w") as file:
@@ -36,11 +41,8 @@ def load_accounts():
     return accounts
 
 def process_account(account, index, total_accounts):
-    # Extract username from initData
-    init_data = urllib.parse.unquote(account['initData'])
-    username_start = init_data.find('username%22%3A%22') + len('username%22%3A%22')
-    username_end = init_data.find('%22%2C%22', username_start)
-    username = init_data[username_start:username_end]
+    # Extract username
+    username = extract_username(account['initData'])
     
     print(f"\nProcessing account {index + 1}/{total_accounts} - Username: {username}")
 
