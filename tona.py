@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import re
 
 def read_data():
-    with open('data.txt', 'r') as file:
+    with open('/mnt/data/data.txt', 'r') as file:
         lines = file.read().splitlines()
 
     accounts = []
@@ -55,8 +55,17 @@ def process_accounts():
     total_accounts = len(accounts)
     print(f"Total accounts: {total_accounts}")
 
+    previous_username = None
+
     for index, account in enumerate(accounts):
         username = extract_username(account['initData'])
+
+        if username == previous_username:
+            print(f"\nDetected duplicate username: {username}. Reloading data.")
+            accounts = read_data()
+            account = accounts[index]
+            username = extract_username(account['initData'])
+
         print(f"\nProcessing account {index + 1}/{total_accounts} - Username: {username}")
 
         headers = {
@@ -96,6 +105,8 @@ def process_accounts():
             print(f"Success for account {index + 1} - Username: {username}")
         else:
             print(f"Failed for account {index + 1} - Username: {username}, status code: {response.status_code}")
+
+        previous_username = username
 
         time.sleep(5)  # Delay of 5 seconds between account switches
 
