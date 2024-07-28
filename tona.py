@@ -28,11 +28,13 @@ def load_accounts():
         if filename.endswith(".txt"):
             with open(os.path.join("accounts", filename), "r") as file:
                 account_data = json.load(file)
+                account_data['filename'] = filename[:-4]  # Store the filename without extension
                 accounts.append(account_data)
     return accounts
 
 def process_account(account, index, total_accounts):
-    print(f"\nProcessing account {index + 1}/{total_accounts}")
+    username = account['filename']
+    print(f"\nProcessing account {index + 1}/{total_accounts} - Username: {username}")
 
     headers = {
         "Accept": "*/*",
@@ -68,9 +70,9 @@ def process_account(account, index, total_accounts):
     response = requests.post('https://tonalytics.top/api2.php', headers=headers, data=payload)
 
     if response.status_code == 200:
-        print(f"Success for account {index + 1}")
+        print(f"Success for account {index + 1} - Username: {username}")
     else:
-        print(f"Failed for account {index + 1}, status code: {response.status_code}")
+        print(f"Failed for account {index + 1} - Username: {username}, status code: {response.status_code}")
 
     time.sleep(5)  # Delay of 5 seconds between account switches
 
