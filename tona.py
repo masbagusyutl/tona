@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import re
 
 def read_data():
-    with open('/mnt/data/data.txt', 'r') as file:
+    with open('data.txt', 'r') as file:
         lines = file.read().splitlines()
 
     accounts = []
