@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import re
 
 def read_data():
-    with open('data.txt', 'r') as file:
+    with open('/mnt/data/data.txt', 'r') as file:
         lines = file.read().splitlines()
 
     accounts = []
@@ -55,16 +55,29 @@ def process_accounts():
     total_accounts = len(accounts)
     print(f"Total accounts: {total_accounts}")
 
-    previous_username = None
+    processed_usernames = set()
 
-    for index, account in enumerate(accounts):
+    for index in range(total_accounts):
+        account = accounts[index]
         username = extract_username(account['initData'])
 
-        if username == previous_username:
-            print(f"\nDetected duplicate username: {username}. Reloading data.")
-            accounts = read_data()
-            account = accounts[index]
-            username = extract_username(account['initData'])
+        if username in processed_usernames:
+            print(f"\nDetected duplicate username: {username}. Searching for a different account.")
+            # Find next account with a different username
+            found_different_username = False
+            for next_index in range(index + 1, total_accounts):
+                next_account = accounts[next_index]
+                next_username = extract_username(next_account['initData'])
+                if next_username not in processed_usernames:
+                    account = next_account
+                    username = next_username
+                    accounts[index], accounts[next_index] = accounts[next_index], accounts[index]
+                    found_different_username = True
+                    break
+
+            if not found_different_username:
+                print("No different username found. Stopping the process.")
+                break
 
         print(f"\nProcessing account {index + 1}/{total_accounts} - Username: {username}")
 
@@ -103,10 +116,9 @@ def process_accounts():
 
         if response.status_code == 200:
             print(f"Success for account {index + 1} - Username: {username}")
+            processed_usernames.add(username)
         else:
             print(f"Failed for account {index + 1} - Username: {username}, status code: {response.status_code}")
-
-        previous_username = username
 
         time.sleep(5)  # Delay of 5 seconds between account switches
 
