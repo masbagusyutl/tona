@@ -36,10 +36,6 @@ def read_data():
 
     return accounts
 
-def extract_username(init_data):
-    match = re.search(r'username%22%3A%22([^%]+)%22', init_data)
-    return match.group(1) if match else "Unknown"
-
 def countdown(seconds):
     end_time = datetime.now() + timedelta(seconds=seconds)
     while datetime.now() < end_time:
@@ -54,8 +50,8 @@ def process_accounts():
     print(f"Total accounts: {total_accounts}")
 
     for index, account in enumerate(accounts):
-        username = extract_username(account['initData'])
-        print(f"\nProcessing account {index + 1}/{total_accounts} - Username: {username}")
+        account_address = account['account[address]']
+        print(f"\nProcessing account {index + 1}/{total_accounts} - Address: {account_address}")
 
         headers = {
             "Accept": "*/*",
@@ -91,9 +87,9 @@ def process_accounts():
         response = requests.post('https://tonalytics.top/api2.php', headers=headers, data=payload)
 
         if response.status_code == 200:
-            print(f"Success for account {index + 1} - Username: {username}")
+            print(f"Success for account {index + 1} - Address: {account_address}")
         else:
-            print(f"Failed for account {index + 1} - Username: {username}, status code: {response.status_code}")
+            print(f"Failed for account {index + 1} - Address: {account_address}, status code: {response.status_code}")
 
         time.sleep(5)  # Delay of 5 seconds between account switches
 
