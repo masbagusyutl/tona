@@ -2,19 +2,10 @@ import os
 import time
 import requests
 import json
-import urllib.parse
 
 # Create accounts directory if it doesn't exist
 if not os.path.exists("accounts"):
     os.makedirs("accounts")
-
-def extract_username(init_data):
-    # Extract username from initData
-    init_data = urllib.parse.unquote(init_data)
-    username_start = init_data.find('username%22%3A%22') + len('username%22%3A%22')
-    username_end = init_data.find('%22%2C%22', username_start)
-    username = init_data[username_start:username_end]
-    return username
 
 def add_account():
     account_data = {}
@@ -23,13 +14,13 @@ def add_account():
     account_data['publicKey'] = input("Enter publicKey: ")
     account_data['initData'] = input("Enter initData: ")
     
-    # Extract username
-    username = extract_username(account_data['initData'])
+    # Manually enter the filename
+    filename = input("Enter a name for this account file (without extension): ")
 
     # Save account data to file
-    with open(f"accounts/{username}.txt", "w") as file:
+    with open(f"accounts/{filename}.txt", "w") as file:
         json.dump(account_data, file)
-    print(f"Account {username} added successfully!")
+    print(f"Account {filename} added successfully!")
 
 def load_accounts():
     accounts = []
@@ -41,10 +32,7 @@ def load_accounts():
     return accounts
 
 def process_account(account, index, total_accounts):
-    # Extract username
-    username = extract_username(account['initData'])
-    
-    print(f"\nProcessing account {index + 1}/{total_accounts} - Username: {username}")
+    print(f"\nProcessing account {index + 1}/{total_accounts}")
 
     headers = {
         "Accept": "*/*",
@@ -80,9 +68,9 @@ def process_account(account, index, total_accounts):
     response = requests.post('https://tonalytics.top/api2.php', headers=headers, data=payload)
 
     if response.status_code == 200:
-        print(f"Success for account {index + 1} - Username: {username}")
+        print(f"Success for account {index + 1}")
     else:
-        print(f"Failed for account {index + 1} - Username: {username}, status code: {response.status_code}")
+        print(f"Failed for account {index + 1}, status code: {response.status_code}")
 
     time.sleep(5)  # Delay of 5 seconds between account switches
 
@@ -100,7 +88,7 @@ def main():
     while True:
         print("\nMenu:")
         print("1. Add account")
-        print("2. Process accounts")
+        print("2. Process accounts continuously")
         print("3. Exit")
         choice = input("Enter your choice: ")
         
